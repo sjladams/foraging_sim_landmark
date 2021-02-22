@@ -159,10 +159,15 @@ class Ant:
         self.cl_beac = min(neigh_dist, key=neigh_dist.get, default=None)
 
     def find_neigh_beacons(self, beacons):
+        # self.neigh = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
+        #                                                         - self.nt[1]) < clip_range]
         self.neigh = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
-                                                                - self.nt[1]) < clip_range]
+                                                - self.nt[1]) < beacons.beacons[beac_tag].range]
+
+        # self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
+        #                                 - self.nt[1]) < clip_range + numeric_step_margin]
         self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
-                                        - self.nt[1]) < clip_range + numeric_step_margin]
+                                                - self.nt[1]) < beacons.beacons[beac_tag].range + numeric_step_margin]
 
     def find_neigh_ants(self, ants):
         self.neigh_ants = [ant_tag for ant_tag in ants if (np.linalg.norm(ants[ant_tag].nt[1]

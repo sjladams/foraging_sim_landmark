@@ -100,6 +100,7 @@ class Simulations:
     #     self.store_nr_trips(time_step)
 
     def update_ant_beacon_connection(self):
+        self.beacons.adapt_ranges()
         self.ants.find_neigh_beacons(self.beacons)           # Depends on location of beacons and ants
         self.ants.find_neigh_ants()  # Depends on location of beacons and ants
         self.ants.find_closest_beacon(self.beacons)                 # Depends on location of beacons and ants, and neigh_beacons
@@ -739,7 +740,8 @@ class Simulations:
         #     voronoi_plot_2d(vor, show_vertices=False)
 
         for beac_tag in self.beacons.beacons:
-            circle = plt.Circle(self.beacons.beacons[beac_tag].pt[1], clip_range , color='r',fill=False)
+            # circle = plt.Circle(self.beacons.beacons[beac_tag].pt[1], clip_range , color='r',fill=False)
+            circle = plt.Circle(self.beacons.beacons[beac_tag].pt[1], self.beacons.beacons[beac_tag].range, color='r', fill=False)
             ax.add_patch(circle)
 
 

@@ -22,6 +22,8 @@ class Beacon:
         # self.neigh_weigh = [[np.NaN], [np.NaN]]
         self.beac_tag = beac_tag
 
+        self.range = clip_range
+
     def fnc_ants_at_beacon(self, ants):
         # /TODO We don't use this one anymore?
         count = 0
@@ -40,6 +42,24 @@ class Beacon:
 
     def food_in_range(self, food_location):
         return np.linalg.norm(self.pt[1] - food_location) <= target_range + numeric_step_margin
+
+    def adapt_range(self):
+        if adapt_range_option == 'angle':
+            if sum(self.v[0]) != 0. and sum(self.v[1]) != 0.:
+                angle = np.arccos(np.dot(self.v[0], self.v[1]) / (np.linalg.norm(self.v[0]) *
+                                                                  np.linalg.norm(self.v[1]))) * 180 / (np.pi)
+                coefficient = (clip_range-min_clip_range)/180
+                self.range = coefficient*angle + min_clip_range
+        elif adapt_range_option == 'weights':
+            if self.w[1] == 0.:
+                self.range = clip_range
+            elif self.w[0] > 0:
+                coefficient = clip_range - min_clip_range
+                self.range = -coefficient*min(1,self.w[1]/self.w[0]) + clip_range
+            else:
+                self.range = min_clip_range
+
+
 
 class Beacons:
     def __init__(self, grid, beacon_grid=default_beacon_grid):
@@ -70,8 +90,10 @@ class Beacons:
     def non_influenced_points(self):
         influenced_points_dict = dict()
         for beac_tag in self.beacons:
+            # influenced_points_dict[beac_tag] = [point for point in self.grid.points if
+            #                    (np.linalg.norm(np.array(point) - self.beacons[beac_tag].pt[1]) <= clip_range)]
             influenced_points_dict[beac_tag] = [point for point in self.grid.points if
-                               (np.linalg.norm(np.array(point) - self.beacons[beac_tag].pt[1]) <= clip_range)]
+                (np.linalg.norm(np.array(point) - self.beacons[beac_tag].pt[1]) <= self.beacons[beac_tag].range)]
         influenced_points = list(set([item for l in influenced_points_dict.values() for item in l]))
         non_influenced_points = [point for point in self.grid.points if point not in influenced_points]
 
@@ -140,6 +162,10 @@ class Beacons:
     def fnc_ants_at_beacons(self, ants):
         for beac_tag in self.beacons:
             self.beacons[beac_tag].fnc_ants_at_beacon(ants)
+
+    def adapt_ranges(self):
+        for beac_tag in self.beacons:
+            self.beacons[beac_tag].adapt_range()
 
     @staticmethod
     def extend_mask(mask):

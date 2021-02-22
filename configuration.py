@@ -20,9 +20,10 @@ default_rho_v = 0.001
 default_epsilon = 0.01 #0.05 #5
 DEBUG=1
 dt=0.5
-target_range=0.6  # Not smaller than dt, since we first perform an update step, afterwhich we update the beacons
+target_range=0.6
 # default_var = 10
 clip_range = 1 #2.
+min_clip_range = 0.5
 
 # elips_a = 0.008    # 0.002 / 0.008
 # elips_c = 0.03     # 0.009 / 0.03
@@ -40,3 +41,5 @@ numeric_step_margin = 0
 
 use_weights_updating_v = False
 use_rhov_2_init = True
+
+adapt_range_option = 'weights'
