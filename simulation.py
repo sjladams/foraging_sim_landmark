@@ -268,11 +268,11 @@ class Simulations:
                 if self.ants.ants[ant_tag]._reached_nest():
                     ant_w_update[0] = self.reward(W1_weights, rew)
 
-                    # count_v0 += 1
-                    # if use_weights_updating_v:
-                    #     beac_v[0] += -self.ants.ants[ant_tag].move[1] * ant_w_update[0]
-                    # else:
-                    #     beac_v[0] += -self.ants.ants[ant_tag].move[1]
+                    count_v0 += 1
+                    if use_weights_updating_v:
+                        beac_v[0] += -self.ants.ants[ant_tag].move[1] * ant_w_update[0]
+                    else:
+                        beac_v[0] += -self.ants.ants[ant_tag].move[1]
 
                 elif self.ants.ants[ant_tag]._reached_food():
                     ant_w_update[1] = self.reward(W2_weights, rew)
@@ -295,11 +295,11 @@ class Simulations:
                 if self.ants.ants[ant_tag]._reached_food():
                     ant_w_update[1] = self.reward(W2_weights, rew)
 
-                    # count_v1 += 1
-                    # if use_weights_updating_v:
-                    #     beac_v[1] += -self.ants.ants[ant_tag].move[1] * ant_w_update[1]
-                    # else:
-                    #     beac_v[1] += -self.ants.ants[ant_tag].move[1]
+                    count_v1 += 1
+                    if use_weights_updating_v:
+                        beac_v[1] += -self.ants.ants[ant_tag].move[1] * ant_w_update[1]
+                    else:
+                        beac_v[1] += -self.ants.ants[ant_tag].move[1]
 
                 elif self.ants.ants[ant_tag]._reached_nest():
                     ant_w_update[0] = self.reward(W1_weights, rew)
