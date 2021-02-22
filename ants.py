@@ -195,8 +195,12 @@ class Ants:
 
     def release_ants(self, n, beac_tags):
         next_tag = max(list(self.ants.keys()) + beac_tags,default=-1)+1
-        for ant_tag in range(next_tag,next_tag+n):
+        release_tags = list(range(next_tag,next_tag+n))
+        for ant_tag in release_tags:
             self.ants[ant_tag] = Ant(self.nest_location, self.food_location, ant_tag, epsilon=self.epsilon)
+        return release_tags
+
+
 
     def find_neigh_beacons(self, beacons):
         for ant_tag in self.ants:
