@@ -7,6 +7,7 @@ simulation = Simulations()
 # simulation.plt_beacons(to_plot='W')
 
 for t in range(0,int(total_time/dt)):
+    print(str(t))
     # print('time is:' + str(t))
     # print({count:item.cl_beac for count,item in enumerate(simulation.ants.ants)})
     # print(simulation.beacons.check_weights(to_show = 'W1'))
