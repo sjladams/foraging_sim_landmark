@@ -35,13 +35,8 @@ class Beacon:
                 count += 1
         self.ants_at_beacon = count
 
-
-    def nest_in_range(self, nest_location):
-        return np.linalg.norm(self.pt[1] - nest_location) <= target_range + numeric_step_margin
-
-
-    def food_in_range(self, food_location):
-        return np.linalg.norm(self.pt[1] - food_location) <= target_range + numeric_step_margin
+    def in_range(self, location):
+        return np.linalg.norm(self.pt[1] - location) <= target_range + numeric_step_margin
 
     def adapt_range(self):
         if adapt_range_option == 'angle':

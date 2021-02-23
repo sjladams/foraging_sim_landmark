@@ -51,30 +51,20 @@ class Ant:
             w_type_wander = 1
         self.move[0] = self.move[1]
 
-        # derv = drv_gaussian(self.nt[1][0], self.nt[1][1], beacons.beacons, w_type) + \
-        #        np.array([x_drv_elips_gaussian(self.nt[1][0], self.nt[1][1]),
-        #                 y_drv_elips_gaussian(self.nt[1][0], self.nt[1][1])])
-
-        # self.find_neigh_beacons(beacons)
-
-        # weights = {beac_tag:beacons.beacons[beac_tag].w[w_type] for beac_tag in self.neigh}
         weights = {beac_tag: beacons.beacons[beac_tag].w[w_type] for beac_tag in self.neigh_toll}
+        # max_beac_tag = max(weights, key=weights.get, default='nothing_in_range')
 
         # weights_wander = {beac_tag: beacons.beacons[beac_tag].w[w_type_wander] for beac_tag in self.neigh}
-        max_beac_tag = max(weights, key=weights.get, default = 'nothing_in_range')
         # max_beac_tag_wander = max(weights_wander, key=weights_wander.get, default='nothing_in_range')
+
         derv = np.zeros(2)
-        if max_beac_tag != 'nothing_in_range':
-            if beacons.beacons[max_beac_tag].w[w_type] > 0.:
-                # location_max_beacon = beacons.beacons[max_beac_tag].pt[1]
-                # derv = location_max_beacon - self.nt[1]
-                # derv = self.normalize(beacons.beacons[max_beac_tag].v[w_type])
+        if sum(weights.values()):
+            derv = sum(np.array([weights[tag] * beacons.beacons[tag].v[w_type] for tag in weights]))
 
-                # derv = beacons.beacons[max_beac_tag].v[w_type]
-                derv = sum(np.array([weights[tag] * beacons.beacons[tag].v[w_type] for tag in weights]))
-
-                # if np.isnan(derv[0]) or np.isnan(derv[1]):
-                #     print('hier zit ie')
+        # if max_beac_tag != 'nothing_in_range':
+        #     if beacons.beacons[max_beac_tag].w[w_type] > 0.:
+        #         # derv = beacons.beacons[max_beac_tag].v[w_type]
+        #         derv = sum(np.array([weights[tag] * beacons.beacons[tag].v[w_type] for tag in weights]))
 
             # # /TODO enable speeding up exploring
             # elif self.neigh_ants:
@@ -104,10 +94,11 @@ class Ant:
 
         # if np.linalg.norm(derv) < step_threshold or self.epsilon > random.uniform(0,1):
 
-        if max_beac_tag == 'nothing_in_range':
+        if not sum(weights.values()):
             derv = np.array([random.uniform(-1, 1), random.uniform(-1, 1)])
             self.exploring_mode = True
-        elif beacons.beacons[max_beac_tag].w[w_type] < step_threshold or self.epsilon > random.uniform(0, 1):
+        # /TODO change to sum of weights
+        elif max(weights.values()) < step_threshold or self.epsilon > random.uniform(0, 1):
             derv = np.array([random.uniform(-1,1),random.uniform(-1,1)])
             self.exploring_mode = True
             # derv = np.random.normal(scale=dt, size=(2))
@@ -117,19 +108,20 @@ class Ant:
         else:
             self.exploring_mode = False
 
-        # if move_type == 'add':
-        #    self.move[1] = self.normalize(self.normalize(derv)*dt + self.move[1])*dt
-        # elif move_type == 'der':
-        #     self.move[1] = self.normalize(derv)*dt
-        # elif move_type == 'add_switch':
-        if self.mode[0] != self.mode[1]:
-            self.move[1] = -self.move[0]
+
+        if self.exploring_mode:
+            self.move[1] = self.normalize(self.normalize(derv) * dt + self.move[1]) * dt
         else:
-            if self.exploring_mode:
-                self.move[1] = self.normalize(self.normalize(derv)*dt + self.move[1])*dt
-            else:
-                self.move[1] = self.normalize(derv) * dt
-                # self.move[1] = self.normalize(self.normalize(derv) * dt + self.move[1]) * dt
+            self.move[1] = self.normalize(derv) * dt
+
+        # if self.mode[0] != self.mode[1]:
+        #     self.move[1] = -self.move[0]
+        # else:
+        #     if self.exploring_mode:
+        #         self.move[1] = self.normalize(self.normalize(derv)*dt + self.move[1])*dt
+        #     else:
+        #         self.move[1] = self.normalize(derv) * dt
+        #         # self.move[1] = self.normalize(self.normalize(derv) * dt + self.move[1]) * dt
 
         return self.move[1]
 
@@ -159,14 +151,12 @@ class Ant:
         self.cl_beac = min(neigh_dist, key=neigh_dist.get, default=None)
 
     def find_neigh_beacons(self, beacons):
-        # self.neigh = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
-        #                                                         - self.nt[1]) < clip_range]
         self.neigh = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
                                                 - self.nt[1]) < beacons.beacons[beac_tag].range]
-
-        # self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
-        #                                 - self.nt[1]) < clip_range + numeric_step_margin]
-        self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
+        if not numeric_step_margin:
+            self.neigh_toll = self.neigh
+        else:
+            self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
                                                 - self.nt[1]) < beacons.beacons[beac_tag].range + numeric_step_margin]
 
     def find_neigh_ants(self, ants):
@@ -175,9 +165,6 @@ class Ant:
 
 class Ants:
     def __init__(self, nest_location, food_location, epsilon=default_epsilon):
-        # self.ants = [Ant(nest_node, food_node, epsilon=default_epsilon) for _ in range(0, N)]
-        # self.ants = {ant_tag: Ant(nest_location, food_location, ant_tag, epsilon=epsilon)
-        #              for ant_tag in range(1, N+1)}
         self.ants = dict()
 
         self.nest_location = nest_location
@@ -191,8 +178,6 @@ class Ants:
     def find_closest_beacon(self, beacons):
         for ant_tag in self.ants:
             self.ants[ant_tag].find_closest_beacon(beacons)
-
-
 
     # def update_weights(self, beacons):
     #     for ant_tag in self.ants:

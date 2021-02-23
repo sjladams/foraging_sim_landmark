@@ -23,7 +23,7 @@ dt=0.5
 target_range=0.6
 # default_var = 10
 clip_range = 1 #2.
-min_clip_range = 0.5
+min_clip_range = 0.75
 
 # elips_a = 0.008    # 0.002 / 0.008
 # elips_c = 0.03     # 0.009 / 0.03

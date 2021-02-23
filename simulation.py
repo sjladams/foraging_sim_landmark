@@ -112,13 +112,12 @@ class Simulations:
         old_ants = self.ants.ants.copy()
         tags_changed = []
         for ant_tag in old_ants:
-            # if sum(self.ants.ants[ant_tag].w) <= 0.:
-            if self.ants.ants[ant_tag].cl_beac == None or self.ants.ants[ant_tag]._reached_food() and not self.food_found:
-                # \TODO GEBEUND, AANPASSEN?
-                if self.ants.ants[ant_tag]._reached_food() and not self.food_found:
-                    self.food_found = True
-                    self.food_location = self.ants.ants[ant_tag].nt[1]
-            # if self.ants.ants[ant_tag].cl_beac == None:
+            # if self.ants.ants[ant_tag].cl_beac == None or self.ants.ants[ant_tag]._reached_food() and not self.food_found:
+                # # \TODO GEBEUND, AANPASSEN?
+                # if self.ants.ants[ant_tag]._reached_food() and not self.food_found:
+                #     self.food_found = True
+                #     self.food_location = self.ants.ants[ant_tag].nt[1]
+            if self.ants.ants[ant_tag].cl_beac == None:
 
                 tags_changed += [ant_tag]
 
@@ -152,104 +151,6 @@ class Simulations:
     def reward(self, weights,rew):
         # return self.rho * (lam * max(weights, default=0) + rew) / (ants_at_beacon)
         return self.rho * (lam * max(weights, default=0) + rew)
-
-    # def initialize_beacon_weights(self,tag):
-    #     # /TODO remove initialization
-    #
-    #     self.update_beacon_weight(tag, [tag])
-    #     #
-    #     # # self.ants.ants[tag].find_neigh_beacons(self.beacons)
-    #     # W1_weights = [self.beacons.beacons[beac_tag].w[0] for beac_tag in self.ants.ants[tag].neigh]
-    #     # W2_weights = [self.beacons.beacons[beac_tag].w[1] for beac_tag in self.ants.ants[tag].neigh]
-    #     #
-    #     # ant_w_update = np.array([0., 0.])
-    #     # beac_v = np.array([[0., 0.], [0., 0.]])
-    #     #
-    #     # if self.ants.ants[tag].mode[0] == 0:
-    #     #     if self.ants.ants[tag]._reached_nest():
-    #     #         ant_w_update[0] += self.reward(W1_weights, rew)
-    #     #
-    #     #         # if use_weights_updating_v:
-    #     #         #     beac_v[0] += - self.ants.ants[tag].move[1] * ant_w_update[0]
-    #     #         # else:
-    #     #         #     beac_v[0] += - self.ants.ants[tag].move[1]
-    #     #
-    #     #     elif self.ants.ants[tag]._reached_food():
-    #     #         ant_w_update[1] += self.reward(W2_weights, rew)
-    #     #         # if use_weights_updating_v:
-    #     #         #     beac_v[1] += self.ants.ants[tag].move[1] * ant_w_update[1]
-    #     #         # else:
-    #     #         #     beac_v[1] += self.ants.ants[tag].move[1]
-    #     #
-    #     #     else:
-    #     #         ant_w_update[0] += self.reward(W1_weights, 0)
-    #     #         # / TODO check this trange condition
-    #     #         if self.ants.ants[tag].mode[0] == self.ants.ants[tag].mode[1]:
-    #     #             if use_weights_updating_v:
-    #     #                 beac_v[0] += -self.ants.ants[tag].move[1] * ant_w_update[0]
-    #     #             else:
-    #     #                 beac_v[0] += -self.ants.ants[tag].move[1]
-    #     #
-    #     #
-    #     # elif self.ants.ants[tag].mode[0] == 1:
-    #     #     if self.ants.ants[tag]._reached_food():
-    #     #         ant_w_update[1] += self.reward(W2_weights, rew)
-    #     #
-    #     #         # if use_weights_updating_v:
-    #     #         #     beac_v[1] += - self.ants.ants[tag].move[1] * ant_w_update[1]
-    #     #         # else:
-    #     #         #     beac_v[1] += - self.ants.ants[tag].move[1]
-    #     #
-    #     #     elif self.ants.ants[tag]._reached_nest():
-    #     #         ant_w_update[0] += self.reward(W1_weights, rew)
-    #     #         # if use_weights_updating_v:
-    #     #         #     beac_v[0] += self.ants.ants[tag].move[1] * ant_w_update[0]
-    #     #         # else:
-    #     #         #     beac_v[0] += self.ants.ants[tag].move[1]
-    #     #
-    #     #     else:
-    #     #         ant_w_update[1] += self.reward(W2_weights, 0)
-    #     #         if self.ants.ants[tag].mode[0] == self.ants.ants[tag].mode[1]:
-    #     #             if use_weights_updating_v:
-    #     #                 beac_v[1] += - self.ants.ants[tag].move[1] * ant_w_update[1]
-    #     #             else:
-    #     #                 beac_v[1] += - self.ants.ants[tag].move[1]
-    #     #
-    #     #
-    #     # self.beacons.beacons[tag].w[0] += ant_w_update[0]
-    #     # self.beacons.beacons[tag].w[1] += ant_w_update[1]
-    #     #
-    #     # if use_weights_updating_v:
-    #     #     if use_rhov_2_init:
-    #     #         self.beacons.beacons[tag].v[0] += self.rho_v * beac_v[0] / ant_w_update[0]
-    #     #         self.beacons.beacons[tag].v[1] += self.rho_v * beac_v[1] / ant_w_update[1]
-    #     #     else:
-    #     #         self.beacons.beacons[tag].v[0] += beac_v[0] / ant_w_update[0]
-    #     #         self.beacons.beacons[tag].v[1] += beac_v[1] / ant_w_update[1]
-    #     # else:
-    #     #     if use_rhov_2_init:
-    #     #         self.beacons.beacons[tag].v[0] += self.rho_v * beac_v[0]
-    #     #         self.beacons.beacons[tag].v[1] += self.rho_v * beac_v[1]
-    #     #     else:
-    #     #         self.beacons.beacons[tag].v[0] += beac_v[0]
-    #     #         self.beacons.beacons[tag].v[1] += beac_v[1]
-    #     #
-    #     # # if self.beacons.beacons[tag].nest_in_range(self.nest_location):
-    #     # #     self.beacons.beacons[tag].v[0] = np.array([0,0])
-    #     # # elif self.beacons.beacons[tag].food_in_range(self.food_location):
-    #     # #     self.beacons.beacons[tag].v[1] = np.array([0, 0])
-    #     #
-    #     # # if (self.beacons.beacons[tag].pt[1] == self.nest_location).all():
-    #     # #     self.beacons.beacons[tag].v[0] = np.array([0,0])
-    #     # # elif (self.beacons.beacons[tag].pt[1] == self.food_location).all():
-    #     # #     self.beacons.beacons[tag].v[1] = np.array([0, 0])
-    #     #
-    #     # # if (np.linalg.norm(self.beacons.beacons[tag].v[1]) >dt + 0.001 or \
-    #     # #         np.linalg.norm(self.beacons.beacons[tag].v[1]) < dt - 0.001) and np.linalg.norm(self.beacons.beacons[tag].v[1]) != 0.:
-    #     # #     print('hoe kan dit')
-    #     # # if (np.linalg.norm(self.beacons.beacons[tag].v[0]) >dt + 0.001 or \
-    #     # #         np.linalg.norm(self.beacons.beacons[tag].v[0]) < dt - 0.001) and np.linalg.norm(self.beacons.beacons[tag].v[0]) != 0.:
-    #     # #     print('hoe kan dit')
 
     def update_beacon_weight(self,beac_tag, ant_tags):
         beac_v = np.array([[0., 0.], [0., 0.]])
@@ -323,6 +224,10 @@ class Simulations:
             self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / len(ant_tags)
             self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] / len(ant_tags)
 
+        if self.beacons.beacons[beac_tag].in_range(self.nest_location) or \
+                self.beacons.beacons[beac_tag].in_range(self.food_location):
+            beac_v = np.array([[0., 0.], [0., 0.]])
+
         if np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) and count_v0:
             self.beacons.beacons[beac_tag].v[0] *= (1 - self.rho_v)
             if use_weights_updating_v:
@@ -359,6 +264,7 @@ class Simulations:
                 else:
                     self.beacons.beacons[beac_tag].v[1] += beac_v[1] / (count_v1)
 
+
     def update_beacon_weights(self):
         # /TODO We now reward for every ant that finds the food! Not in line with our concept
         # /TODO check if it is correct to use mode[0]
@@ -372,132 +278,6 @@ class Simulations:
                 continue
 
             self.update_beacon_weight(beac_tag, ants_at_beacon)
-
-            # beac_v = np.array([[0.,0.],[0.,0.]])
-            # ants_w_update = np.array([0.,0.])
-            # count_v0 = 0
-            # count_v1 = 0
-            #
-            # for ant_tag in ants_at_beacon:
-            #     if self.ants.ants[ant_tag].obs_avoid_mode:
-            #         continue
-            #
-            #     W1_weights = [self.beacons.beacons[beac_tag].w[0] for beac_tag in self.ants.ants[ant_tag].neigh]
-            #     W2_weights = [self.beacons.beacons[beac_tag].w[1] for beac_tag in self.ants.ants[ant_tag].neigh]
-            #     ant_w_update = np.array([0.,0.])
-            #
-            #     if self.ants.ants[ant_tag].mode[0] == 0:
-            #         if self.ants.ants[ant_tag]._reached_nest():
-            #             ant_w_update[0] = self.reward(W1_weights,rew)
-            #
-            #             count_v0 += 1
-            #             if use_weights_updating_v:
-            #                 beac_v[0] += -self.ants.ants[ant_tag].move[1] * ant_w_update[0]
-            #             else:
-            #                 beac_v[0] += -self.ants.ants[ant_tag].move[1]
-            #
-            #         elif self.ants.ants[ant_tag]._reached_food():
-            #             ant_w_update[1] = self.reward(W2_weights, rew)
-            #
-            #             count_v1 += 1
-            #             if use_weights_updating_v:
-            #                 beac_v[1] += self.ants.ants[ant_tag].move[1] * ant_w_update[1]
-            #             else:
-            #                 beac_v[1] += self.ants.ants[ant_tag].move[1]
-            #         else:
-            #             ant_w_update[0] = self.reward(W1_weights,0,)
-            #
-            #             count_v0 += 1
-            #             if use_weights_updating_v:
-            #                 beac_v[0] += -self.ants.ants[ant_tag].move[1] * ant_w_update[0]
-            #             else:
-            #                 beac_v[0] += -self.ants.ants[ant_tag].move[1]
-            #
-            #     elif self.ants.ants[ant_tag].mode[0] == 1:
-            #         if self.ants.ants[ant_tag]._reached_food():
-            #             ant_w_update[1] = self.reward(W2_weights,rew)
-            #
-            #             count_v1 += 1
-            #             if use_weights_updating_v:
-            #                 beac_v[1] += -self.ants.ants[ant_tag].move[1]*ant_w_update[1]
-            #             else:
-            #                 beac_v[1] += -self.ants.ants[ant_tag].move[1]
-            #
-            #         elif self.ants.ants[ant_tag]._reached_nest():
-            #             ant_w_update[0] = self.reward(W1_weights,rew)
-            #
-            #             count_v0 += 1
-            #             if use_weights_updating_v:
-            #                 beac_v[0] += self.ants.ants[ant_tag].move[1]*ant_w_update[0]
-            #             else:
-            #                 beac_v[0] += self.ants.ants[ant_tag].move[1]
-            #         else:
-            #             ant_w_update[1] = self.reward(W2_weights, 0)
-            #
-            #             count_v1 +=1
-            #             if use_weights_updating_v:
-            #                 beac_v[1] += -self.ants.ants[ant_tag].move[1]*ant_w_update[1]
-            #             else:
-            #                 beac_v[1] += -self.ants.ants[ant_tag].move[1]
-            #
-            #     ants_w_update += ant_w_update
-            #     # self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / self.beacons.beacons[beac_tag].ants_at_beacon
-            #     self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / len(ants_at_beacon)
-            #     # self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] /self.beacons.beacons[beac_tag].ants_at_beacon
-            #     self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] / len(ants_at_beacon)
-            #
-            # if np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) and count_v0:
-            #     self.beacons.beacons[beac_tag].v[0] *= (1 - self.rho_v)
-            #     if use_weights_updating_v:
-            #         self.beacons.beacons[beac_tag].v[0] += self.rho_v * beac_v[0] / (count_v0* ants_w_update[0])
-            #     else:
-            #         self.beacons.beacons[beac_tag].v[0] += self.rho_v * beac_v[0] / (count_v0)
-            # elif count_v0:
-            #     if use_weights_updating_v:
-            #         if use_rhov_2_init:
-            #             self.beacons.beacons[beac_tag].v[0] += self.rho_v * beac_v[0] /(count_v0* ants_w_update[0])
-            #         else:
-            #             self.beacons.beacons[beac_tag].v[0] += beac_v[0] / (count_v0* ants_w_update[0])
-            #     else:
-            #         if use_rhov_2_init:
-            #             self.beacons.beacons[beac_tag].v[0] += self.rho_v * beac_v[0] / (count_v0)
-            #         else:
-            #             self.beacons.beacons[beac_tag].v[0] += beac_v[0] / (count_v0)
-            #
-            # if np.linalg.norm(self.beacons.beacons[beac_tag].v[1]) and count_v1:
-            #     self.beacons.beacons[beac_tag].v[1] *= (1 - self.rho_v)
-            #     if use_weights_updating_v:
-            #         self.beacons.beacons[beac_tag].v[1] += self.rho_v * beac_v[1] / (count_v1* ants_w_update[1])
-            #     else:
-            #         self.beacons.beacons[beac_tag].v[1] += self.rho_v * beac_v[1] / (count_v1)
-            # elif count_v1:
-            #     if use_weights_updating_v:
-            #         if use_rhov_2_init:
-            #             self.beacons.beacons[beac_tag].v[1] += self.rho_v * beac_v[1] /(count_v1* ants_w_update[1])
-            #         else:
-            #             self.beacons.beacons[beac_tag].v[1] += beac_v[1] / (count_v1* ants_w_update[1])
-            #     else:
-            #         if use_rhov_2_init:
-            #             self.beacons.beacons[beac_tag].v[1] += self.rho_v * beac_v[1] / (count_v1)
-            #         else:
-            #             self.beacons.beacons[beac_tag].v[1] += beac_v[1] / (count_v1)
-            #
-            # # if self.beacons.beacons[beac_tag].nest_in_range(self.nest_location):
-            # #     self.beacons.beacons[beac_tag].v[0] = np.array([0, 0])
-            # # elif self.beacons.beacons[beac_tag].food_in_range(self.food_location):
-            # #     self.beacons.beacons[beac_tag].v[1] = np.array([0, 0])
-            #
-            # # if (self.beacons.beacons[beac_tag].pt[1] == self.nest_location).all():
-            # #     self.beacons.beacons[beac_tag].v[0] = np.array([0, 0])
-            # # elif (self.beacons.beacons[beac_tag].pt[1] == self.food_location).all():
-            # #     self.beacons.beacons[beac_tag].v[1] = np.array([0, 0])
-            #
-            # # if (np.linalg.norm(self.beacons.beacons[beac_tag].v[1]) > dt + 0.01 or \
-            # #         np.linalg.norm(self.beacons.beacons[beac_tag].v[1]) < dt - 0.01) and np.linalg.norm(self.beacons.beacons[beac_tag].v[1]) != 0.:
-            # #     print('hoe kan dit')
-            # # if (np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) > dt + 0.01 or \
-            # #         np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) < dt - 0.01) and np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) != 0.:
-            # #     print('hoe kan dit')
 
     def plt(self, to_plot='W'):
         # vor = Voronoi([item.pt[1] for item in self.beacons.beacons])

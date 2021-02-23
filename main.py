@@ -8,6 +8,8 @@ simulation = Simulations()
 
 for t in range(0,int(total_time/dt)):
     print(str(t))
+    if t > 10:
+        print('stop even hier')
     # print('time is:' + str(t))
     # print({count:item.cl_beac for count,item in enumerate(simulation.ants.ants)})
     # print(simulation.beacons.check_weights(to_show = 'W1'))
