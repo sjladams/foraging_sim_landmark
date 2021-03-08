@@ -190,8 +190,6 @@ class Ants:
             self.ants[ant_tag] = Ant(self.nest_location, self.food_location, ant_tag, epsilon=self.epsilon)
         return release_tags
 
-
-
     def find_neigh_beacons(self, beacons):
         for ant_tag in self.ants:
             self.ants[ant_tag].find_neigh_beacons(beacons)

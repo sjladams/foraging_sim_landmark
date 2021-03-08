@@ -1,6 +1,6 @@
 local = True
 
-total_time = 2000
+total_time = 500
 
 default_grid_size = [100,52]      # [200,100] / [100,50]
 default_domain = [20,10]           # [40,20] / [20,10]
@@ -42,4 +42,4 @@ numeric_step_margin = 0
 use_weights_updating_v = False
 use_rhov_2_init = True
 
-adapt_range_option = 'weights'
+adapt_range_option = 'no adaption' # weights, angle, no adaption

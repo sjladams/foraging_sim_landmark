@@ -101,9 +101,10 @@ class Simulations:
 
     def update_ant_beacon_connection(self):
         self.beacons.adapt_ranges()
-        self.ants.find_neigh_beacons(self.beacons)           # Depends on location of beacons and ants
-        self.ants.find_neigh_ants()  # Depends on location of beacons and ants
+        self.ants.find_neigh_beacons(self.beacons)                  # Depends on location of beacons and ants
+        self.ants.find_neigh_ants()                                 # Depends on location of beacons and ants
         self.ants.find_closest_beacon(self.beacons)                 # Depends on location of beacons and ants, and neigh_beacons
+        self.beacons.find_neigh_beacons()                           # Depends on location of beacons
         self.beacons.fnc_ants_at_beacons(self.ants.ants)            # Depends on cl_beaon
 
     def switch_step(self):
@@ -162,8 +163,8 @@ class Simulations:
             if self.ants.ants[ant_tag].obs_avoid_mode:
                 continue
 
-            W1_weights = [self.beacons.beacons[beac_tag].w[0] for beac_tag in self.ants.ants[ant_tag].neigh]
-            W2_weights = [self.beacons.beacons[beac_tag].w[1] for beac_tag in self.ants.ants[ant_tag].neigh]
+            W1_weights = [self.beacons.beacons[tag].w[0] for tag in self.ants.ants[ant_tag].neigh]
+            W2_weights = [self.beacons.beacons[tag].w[1] for tag in self.ants.ants[ant_tag].neigh]
             ant_w_update = np.array([0., 0.])
 
             if self.ants.ants[ant_tag].mode[0] == 0:
@@ -179,11 +180,6 @@ class Simulations:
                 elif self.ants.ants[ant_tag]._reached_food():
                     ant_w_update[1] = self.reward(W2_weights, rew)
 
-                    # count_v1 += 1
-                    # if use_weights_updating_v:
-                    #     beac_v[1] += self.ants.ants[ant_tag].move[1] * ant_w_update[1]
-                    # else:
-                    #     beac_v[1] += self.ants.ants[ant_tag].move[1]
                 else:
                     ant_w_update[0] = self.reward(W1_weights, 0, )
 
@@ -206,11 +202,6 @@ class Simulations:
                 elif self.ants.ants[ant_tag]._reached_nest():
                     ant_w_update[0] = self.reward(W1_weights, rew)
 
-                    # count_v0 += 1
-                    # if use_weights_updating_v:
-                    #     beac_v[0] += self.ants.ants[ant_tag].move[1] * ant_w_update[0]
-                    # else:
-                    #     beac_v[0] += self.ants.ants[ant_tag].move[1]
                 else:
                     ant_w_update[1] = self.reward(W2_weights, 0)
 
@@ -221,8 +212,22 @@ class Simulations:
                         beac_v[1] += -self.ants.ants[ant_tag].move[1]
 
             ants_w_update += ant_w_update
-            self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / len(ant_tags)
-            self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] / len(ant_tags)
+            self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / (len(ant_tags)+1) #+1 for self loop
+            self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] / (len(ant_tags)+1) #+1 for self loop
+
+        W1_weights = [self.beacons.beacons[tag].w[0] for tag in self.beacons.beacons[beac_tag].neigh]
+        W2_weights = [self.beacons.beacons[tag].w[1] for tag in self.beacons.beacons[beac_tag].neigh]
+
+        if self.beacons.beacons[beac_tag].in_range(self.nest_location):
+            self.beacons.beacons[beac_tag].w[0] += self.reward(W1_weights, rew) / (len(ant_tags)+1) #+1 for self loop
+        else:
+            self.beacons.beacons[beac_tag].w[0] += self.reward(W1_weights, 0) / (len(ant_tags)+1)  # +1 for self loop
+
+        if self.beacons.beacons[beac_tag].in_range(self.food_location):
+            self.beacons.beacons[beac_tag].w[1] += self.reward(W2_weights, rew) / (len(ant_tags)+1) #+1 for self loop
+        else:
+            self.beacons.beacons[beac_tag].w[1] += self.reward(W2_weights, 0) / (len(ant_tags)+1)  # +1 for self loop
+
 
         if self.beacons.beacons[beac_tag].in_range(self.nest_location) or \
                 self.beacons.beacons[beac_tag].in_range(self.food_location):

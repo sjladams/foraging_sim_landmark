@@ -19,6 +19,7 @@ class Beacon:
         self.mt = [np.NaN, np.NaN]
         self.ct = [[np.NaN, np.NaN], [np.NaN, np.NaN]]
         self.neigh = []
+        self.neigh_toll = []
         # self.neigh_weigh = [[np.NaN], [np.NaN]]
         self.beac_tag = beac_tag
 
@@ -27,9 +28,6 @@ class Beacon:
     def fnc_ants_at_beacon(self, ants):
         # /TODO We don't use this one anymore?
         count = 0
-        # for ant_tag in ants:
-        #     if ants[ant_tag].cl_beac == self.beac_tag:
-        #         count += 1
         for ant_tag in ants:
             if self.beac_tag in ants[ant_tag].neigh:
                 count += 1
@@ -54,7 +52,17 @@ class Beacon:
             else:
                 self.range = min_clip_range
 
+        elif adapt_range_option == 'no adaption':
+            self.range = clip_range
 
+    def find_neigh_beacons(self, beacons):
+        self.neigh = [beac_tag for beac_tag in beacons if np.linalg.norm(beacons[beac_tag].pt[1]
+                                                - self.pt[1]) < beacons[beac_tag].range]
+        if not numeric_step_margin:
+            self.neigh_toll = self.neigh
+        else:
+            self.neigh_toll = [beac_tag for beac_tag in beacons.beacons if np.linalg.norm(beacons.beacons[beac_tag].pt[1]
+                                                - self.pt[1]) < beacons.beacons[beac_tag].range + numeric_step_margin]
 
 class Beacons:
     def __init__(self, grid, beacon_grid=default_beacon_grid):
@@ -66,21 +74,6 @@ class Beacons:
         self.masks = []
         self.map_closest_beacon = []
         self.n = len(self.beacons)
-
-    def update_beacon_configuration(self, position_changed=True, weights_changed=True, just_initialized = False ):
-        # if position_changed:
-        #     self.update_masks()
-        # if weights_changed:
-        #     self.update_neighbours_weights()
-        # TODO check why just_initialized condition is needed
-        if weights_changed and not just_initialized:
-            self.update_amplitude()
-            self.update_variance()
-
-    def move_step(self, W):
-        self.update_m_c_beacons(W)
-        self.update_locations()
-        self.update_beacon_configuration()
 
     def non_influenced_points(self):
         influenced_points_dict = dict()
@@ -94,22 +87,6 @@ class Beacons:
 
         return np.array(non_influenced_points)
 
-    def update_masks(self):
-        self.tree = KDTree([self.beacons[beac_tag].pt[1] for beac_tag in self.beacons])
-        self.map_closest_beacon = np.array([[self.tree.query([self.grid.X[cy][cx], self.grid.Y[cy][cx]])[1] for cx in
-                                             range(len(self.grid.x))] for cy in range(len(self.grid.y))])
-        self.masks = {beac_tag: (self.map_closest_beacon == count) * 1 for count, beac_tag in enumerate(self.beacons)}
-
-        for beac_tag in self.masks:
-            extended_mask = self.extend_mask(self.masks[beac_tag])
-            self.beacons[beac_tag].neigh = [tag for tag in self.masks if
-                                            True in (extended_mask + self.masks[tag] >= 2) and tag != beac_tag]
-
-    # def update_neighbours_weights(self):
-    #     for beac_tag in self.masks:
-    #         self.beacons[beac_tag].neigh_weigh = [[self.beacons[tag].w[0] for tag in self.beacons[beac_tag].neigh],
-    #                                               [self.beacons[tag].w[1] for tag in self.beacons[beac_tag].neigh]]
-
     def evaporate_weights(self, rho=default_rho):
         for beac_tag in self.beacons:
             self.beacons[beac_tag].w *= (1 - rho)
@@ -117,42 +94,6 @@ class Beacons:
     def initialize_weights(self):
         for beac_tag in self.beacons:
             self.beacons[beac_tag].w = np.array([0., 0.])
-
-    def update_m_c_beacons(self, W):
-        for beac_tag in self.beacons:
-            self.beacons[beac_tag].mt[0] = self.beacons[beac_tag].mt[1]
-            self.beacons[beac_tag].ct[0][0] = self.beacons[beac_tag].ct[0][1]
-            self.beacons[beac_tag].ct[1][0] = self.beacons[beac_tag].ct[1][1]
-            self.beacons[beac_tag].mt[1] = simps(simps(W * self.masks[beac_tag], self.grid.x), self.grid.y)
-            self.beacons[beac_tag].ct[0][1] = simps(simps(W * self.grid.X * self.masks[beac_tag], self.grid.x),
-                                                    self.grid.y) / self.beacons[beac_tag].mt[1]
-            self.beacons[beac_tag].ct[1][1] = simps(simps(W * self.grid.Y * self.masks[beac_tag], self.grid.x),
-                                                    self.grid.y) / self.beacons[beac_tag].mt[1]
-
-    def update_locations(self):
-        for beac_tag in self.beacons:
-            if beac_tag not in [0,1]:
-                delta_ct = [(self.beacons[beac_tag].ct[0][1] - self.beacons[beac_tag].ct[0][0]),
-                            (self.beacons[beac_tag].ct[1][1] - self.beacons[beac_tag].ct[1][0])]
-                delta_x = (delta_ct[0] / dt) - kappa * (self.beacons[beac_tag].pt[1][0] - self.beacons[beac_tag].ct[0][1]) + \
-                          delta_ct[0] * self.neigh_control_term(self.beacons[beac_tag])[0]
-                delta_y = (delta_ct[1] / dt) - kappa * (self.beacons[beac_tag].pt[1][1] - self.beacons[beac_tag].ct[1][1]) + \
-                          delta_ct[1] * self.neigh_control_term(self.beacons[beac_tag])[1]
-
-                self.beacons[beac_tag].pt[0] = self.beacons[beac_tag].pt[1]
-                self.beacons[beac_tag].pt[1] = [self.beacons[beac_tag].pt[0][0] + bound(delta_x * dt),
-                                                self.beacons[beac_tag].pt[0][1] + bound(delta_y * dt)]
-
-    def neigh_control_term(self, beacon):
-        move_i = [0, 0]
-        for count_j in beacon.neigh:
-            j = self.beacons[count_j]
-            move_j = [j.pt[0][1] - j.pt[0][0], j.pt[1][1] - j.pt[1][0]]
-            if move_j[0] != 0:
-                move_i[0] += (1 / move_j[0]) * ((j.ct[0][1] - j.ct[0][0]) / dt - kappa * (j.pt[0][1] - j.ct[0][1]))
-            if move_j[1] != 0:
-                move_i[1] += (1 / move_j[1]) * ((j.ct[1][1] - j.ct[1][0]) / dt - kappa * (j.pt[1][1] - j.ct[1][1]))
-        return move_i
 
     def fnc_ants_at_beacons(self, ants):
         for beac_tag in self.beacons:
@@ -183,6 +124,10 @@ class Beacons:
     def check_ants(self, thres=0):
         return {beac_tag: self.beacons[beac_tag].ants_at_beacon for beac_tag in self.beacons if
                 self.beacons[beac_tag].ants_at_beacon > thres}
+
+    def find_neigh_beacons(self):
+        for beac_tag in self.beacons:
+            self.beacons[beac_tag].find_neigh_beacons(self.beacons)
 
 # test = {beac_tag: simulation.beacons.beacons[beac_tag].w[0] + simulation.beacons.beacons[beac_tag].w[1] for beac_tag in
 #         simulation.beacons.beacons if
