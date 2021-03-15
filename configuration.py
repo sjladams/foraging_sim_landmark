@@ -1,15 +1,20 @@
 local = True
 
-total_time = 500
+total_time = 200
 
 default_grid_size = [100,52]      # [200,100] / [100,50]
-default_domain = [20,10]           # [40,20] / [20,10]
-default_nest_location = [7.5, 5.]    # [5.,4.] / [5., 4.]
-default_food_location = [12.5,5.]   # [30.,14.] / [15., 6.]
+default_domain = [5,5]           # [40,20] / [20,10]
+
+# provide corner points of as: obstacle = [lower left, upper left, upper right, lower right]
+obstacle = [[2, 2], [2,3], [3,3], [3,2]]
+# obstacle = None
+
+default_nest_location = [0.5, 2.5]    # [5.,4.] / [5., 4.]
+default_food_location = [4.5,2.5]   # [30.,14.] / [15., 6.]
 default_beacon_grid = [10,8]        # [20,16] / [10,8]
 
-default_N_batch = 5
-default_N_total = 500 # 500 / 100
+default_N_batch = 2
+default_N_total = 50 # 500 / 100
 
 # ampFactor = 30
 kappa=1   #1
@@ -42,4 +47,4 @@ numeric_step_margin = 0
 use_weights_updating_v = False
 use_rhov_2_init = True
 
-adapt_range_option = 'no adaption' # weights, angle, no adaption
+adapt_range_option = 'weights' # weights, angle, no adaption

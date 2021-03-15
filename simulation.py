@@ -28,7 +28,7 @@ class Simulations:
         self.rho = rho
         self.rho_v = rho_v
 
-        self.grid = Grid(grid_size=grid_size,domain=domain)
+        self.grid = Grid(grid_size=grid_size,domain=domain, obstacle=obstacle)
         self.total_trips = dict()
 
         self.beacons = Beacons(self.grid, beacon_grid=beacon_grid)
@@ -160,8 +160,9 @@ class Simulations:
         count_v1 = 0
 
         for ant_tag in ant_tags:
-            if self.ants.ants[ant_tag].obs_avoid_mode:
-                continue
+            # \Todo Check if this is prefered:
+            # if self.ants.ants[ant_tag].obs_avoid_mode:
+            #     continue
 
             W1_weights = [self.beacons.beacons[tag].w[0] for tag in self.ants.ants[ant_tag].neigh]
             W2_weights = [self.beacons.beacons[tag].w[1] for tag in self.ants.ants[ant_tag].neigh]
@@ -215,6 +216,8 @@ class Simulations:
             self.beacons.beacons[beac_tag].w[0] += ant_w_update[0] / (len(ant_tags)+1) #+1 for self loop
             self.beacons.beacons[beac_tag].w[1] += ant_w_update[1] / (len(ant_tags)+1) #+1 for self loop
 
+
+        # Also update the beacon by itself
         W1_weights = [self.beacons.beacons[tag].w[0] for tag in self.beacons.beacons[beac_tag].neigh]
         W2_weights = [self.beacons.beacons[tag].w[1] for tag in self.beacons.beacons[beac_tag].neigh]
 
@@ -227,11 +230,6 @@ class Simulations:
             self.beacons.beacons[beac_tag].w[1] += self.reward(W2_weights, rew) / (len(ant_tags)+1) #+1 for self loop
         else:
             self.beacons.beacons[beac_tag].w[1] += self.reward(W2_weights, 0) / (len(ant_tags)+1)  # +1 for self loop
-
-
-        if self.beacons.beacons[beac_tag].in_range(self.nest_location) or \
-                self.beacons.beacons[beac_tag].in_range(self.food_location):
-            beac_v = np.array([[0., 0.], [0., 0.]])
 
         if np.linalg.norm(self.beacons.beacons[beac_tag].v[0]) and count_v0:
             self.beacons.beacons[beac_tag].v[0] *= (1 - self.rho_v)
@@ -268,6 +266,11 @@ class Simulations:
                     self.beacons.beacons[beac_tag].v[1] += self.rho_v * beac_v[1] / (count_v1)
                 else:
                     self.beacons.beacons[beac_tag].v[1] += beac_v[1] / (count_v1)
+
+        if self.beacons.beacons[beac_tag].in_range(self.nest_location):
+            self.beacons.beacons[beac_tag].v[0] = np.array([0., 0.])
+        if self.beacons.beacons[beac_tag].in_range(self.food_location):
+            self.beacons.beacons[beac_tag].v[1] = np.array([0., 0.])
 
 
     def update_beacon_weights(self):
@@ -479,6 +482,10 @@ class Simulations:
 
         plt.xlim(-2, self.grid.domain[0]+2)
         plt.ylim(-2, self.grid.domain[1]+2)
+
+        for line in self.grid.ref_lines:
+            plt.plot([item[0] for item in line], [item[1] for item in line], 'r')
+
         # plt.colorbar()
         if to_plot == 'W1' and fig_tag:
             plt.savefig(FOLDER_LOCATION + 'W1_WEIGHTS/' + str(to_plot) + '_' + str(fig_tag) + '.png')

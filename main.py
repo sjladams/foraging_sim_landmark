@@ -7,9 +7,6 @@ simulation = Simulations()
 # simulation.plt_beacons(to_plot='W')
 
 for t in range(0,int(total_time/dt)):
-    print(str(t))
-    if t > 10:
-        print('stop even hier')
     # print('time is:' + str(t))
     # print({count:item.cl_beac for count,item in enumerate(simulation.ants.ants)})
     # print(simulation.beacons.check_weights(to_show = 'W1'))
@@ -20,6 +17,7 @@ for t in range(0,int(total_time/dt)):
     #     simulation.food_location = [13.,2.]
 
     if t % 5 ==0 and t > 0:  #5
+        print(str(t))
         # simulation.plt_beacons(to_plot='W1',fig_tag=t)
         # simulation.plt_beacons(to_plot='W2',fig_tag=t)
         # simulation.plt_beacons(to_plot='W', fig_tag=t)
